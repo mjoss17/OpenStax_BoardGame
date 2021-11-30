@@ -41,6 +41,7 @@ class Board(GameObjectInterface):
             self.players.append(player)
             self.players2spaces[player.uuid] = 0
             print("Board has a New Player - %s" % msg.data.name)
+            return NextTurnMsg()
             
         elif isinstance(msg, MovementMsg):
             player_id = msg.data[0]

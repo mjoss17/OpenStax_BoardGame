@@ -9,6 +9,8 @@ from Message.MovementMsg import MovementMsg
 from Message.EmptyMsg import EmptyMsg
 from Message.NextTurnMsg import NextTurnMsg
 from Message.NewPlayerMsg import NewPlayerMsg
+from Message.AttributeUpdateMsg import AttributeUpdateMsg
+from Message.ErrorMsg import ErrorMsg
 
 
 def test_MovementMsg():
@@ -25,10 +27,31 @@ def test_MovementMsg():
     assert(isinstance(returnMsg, type(NextTurnMsg())))
 
 def test_PurseUpdateMsg():
-    newPlayer = Player("Tom")
+    newPlayer = Player("Greg")
     PurseMsg = PurseUpdateMsg(10)
     returnMsg = newPlayer.processMessage(PurseMsg)
     assert(isinstance(returnMsg, type(NextTurnMsg())))
+
+    newBoard = Board(11)
+    playerMsg = NewPlayerMsg(newPlayer)
+    returnMsg = newBoard.processMessage(playerMsg)
+    assert(isinstance(returnMsg, type(NextTurnMsg())))
+
+def test_AttributeUpdateMsg():
+    newPlayer = Player("Chester")
+    newBoard = Board(100)
+    playerMsg = NewPlayerMsg(newPlayer)
+
+    returnMsg =  newBoard.processMessage(playerMsg)
+    assert(isinstance(returnMsg, type(NextTurnMsg())))
+    
+    AUpdateMsg = AttributeUpdateMsg(newPlayer.uuid, "jail_status", True)
+    returnMsg = newPlayer.processMessage(AUpdateMsg)
+    assert(isinstance(returnMsg, NextTurnMsg))
+
+    AUpdateMsg = AttributeUpdateMsg(newPlayer.uuid, "height", 72)
+    returnMsg = newPlayer.processMessage(AUpdateMsg)
+    assert(isinstance(returnMsg, ErrorMsg))
 
 
 
@@ -36,4 +59,6 @@ def test_PurseUpdateMsg():
 if __name__ == "__main__":
 
     test_MovementMsg()
+    test_PurseUpdateMsg()
+    test_AttributeUpdateMsg()
     print("Everything passed")
