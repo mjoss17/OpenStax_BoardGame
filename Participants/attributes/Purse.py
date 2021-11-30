@@ -5,6 +5,7 @@ class Purse:
 
     def exchange(self, coin_difference):
         self.coins += coin_difference
+        return self.coins
 
     
     

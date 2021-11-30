@@ -6,10 +6,13 @@ class Player(ParticipantInterface):
     
     # Players act by rolling
     rolling_range = 8;
+    purse = Purse()
 
     def __init__(self, name):
         self.name = name
-        self.purse = Purse()
+
+    def name(self):
+        return self.name
 
     def act(self):
         roll = random.randrange(self.rolling_range + 1)

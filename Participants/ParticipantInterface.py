@@ -5,9 +5,6 @@ from attributes.Purse import Purse
 
 class ParticipantInterface:
 
-    def __init__(self, name):
-        self.name = name
-
     def act(self):
         pass
 
