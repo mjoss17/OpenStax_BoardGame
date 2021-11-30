@@ -1,10 +1,12 @@
 import random
 import uuid
+
 from GameObjects.ParticipantInterface import ParticipantInterface
 from GameObjects.Purse import Purse
 from Message.PurseUpdateMsg import PurseUpdateMsg
-from Message.EmptyMsg import EmptyMsg
 from Message.NextTurnMsg import NextTurnMsg
+from Message.EmptyMsg import EmptyMsg
+
 
 class Player(ParticipantInterface):
     
@@ -14,7 +16,7 @@ class Player(ParticipantInterface):
     purse = Purse()
 
     def __init__(self, name):
-        self.name = name
+        self.name = str(name)
         self.uuid = uuid.uuid1()
 
     def name(self):

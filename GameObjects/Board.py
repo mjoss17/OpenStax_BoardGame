@@ -14,21 +14,23 @@ class Board(GameObjectInterface):
     players2spaces = {}
 
     def __init__(self, num_spaces = 12):
-        self.numSpaces = num_spaces
+        if (type(num_spaces) is int and num_spaces > 0 and num_spaces < 1000):
+            self.numSpaces = num_spaces
+
         for i in range(self.numSpaces):
             self.spaces.append(Space(i, self.getCategory(i)))
 
 
     def getCategory(self, i):
-        if i == 0: return 'Pop'
-        if i == 4: return 'Pop'
-        if i == 8: return 'Pop'
-        if i == 1: return 'Science'
-        if i == 5: return 'Science'
-        if i == 9: return 'Science'
-        if i == 2: return 'Sports'
-        if i == 6: return 'Sports'
-        if i == 10: return 'Sports'
+        if i%12 == 0: return 'Pop'
+        if i%12 == 4: return 'Pop'
+        if i%12 == 8: return 'Pop'
+        if i%12 == 1: return 'Science'
+        if i%12 == 5: return 'Science'
+        if i%12 == 9: return 'Science'
+        if i%12 == 2: return 'Sports'
+        if i%12 == 6: return 'Sports'
+        if i%12 == 10: return 'Sports'
         else: return 'Rock'
 
     def processMessage(self, msg):
