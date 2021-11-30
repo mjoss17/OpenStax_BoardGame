@@ -62,9 +62,6 @@ def test_AttributeUpdateMsg():
     returnMsg = newPlayer.processMessage(AUpdateMsg)
     assert(isinstance(returnMsg, EmptyMsg))
 
-
-
-
 if __name__ == "__main__":
 
     test_MovementMsg()

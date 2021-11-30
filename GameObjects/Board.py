@@ -20,6 +20,8 @@ class Board(GameObjectInterface):
         for i in range(self.numSpaces):
             self.spaces.append(Space(i, self.getCategory(i)))
 
+    def getSpaces(self):
+        return self.spaces
 
     def getCategory(self, i):
         if i%12 == 0: return 'Pop'
