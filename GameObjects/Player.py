@@ -6,7 +6,6 @@ from GameObjects.Purse import Purse
 from Message.AnswerMsg import AnswerMsg
 from Message.AttributeUpdateMsg import AttributeUpdateMsg
 from Message.ErrorMsg import ErrorMsg
-from Message.PurseUpdateMsg import PurseUpdateMsg
 from Message.NextTurnMsg import NextTurnMsg
 from Message.EmptyMsg import EmptyMsg
 from Message.QuestionMsg import QuestionMsg
@@ -53,14 +52,7 @@ class Player(ParticipantInterface):
 
     def processMessage(self, msg):
 
-        if isinstance(msg, PurseUpdateMsg):
-            if self.uuid != msg.data[0]:
-                return EmptyMsg()
-            else:
-                self.purse.add(msg.data[1])
-                return AttributeUpdateMsg(self.uuid, "jail_status", False)
-
-        elif isinstance(msg, RollMsg):
+        if isinstance(msg, RollMsg):
             if self.uuid != msg.data:
                 return EmptyMsg()
             else:
@@ -84,9 +76,10 @@ class Player(ParticipantInterface):
                 return EmptyMsg()
             else:
                 if self.change_attributes(msg_attribute, msg_value):
-                    if msg_attribute == "coins":
+                    if msg_attribute != "coins":
+                        return NextTurnMsg()
+                    else:
                         return AttributeUpdateMsg(self.uuid, "jail_status", False)
-                    return NextTurnMsg()
                 else:
                     return ErrorMsg("Attribute Unavailiable")
         else:

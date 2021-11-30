@@ -6,26 +6,32 @@ from Message.MovementMsg import MovementMsg
 from Message.NewPlayerMsg import NewPlayerMsg
 from Message.ErrorMsg import ErrorMsg
 from Message.NextTurnMsg import NextTurnMsg
-from Message.PurseUpdateMsg import PurseUpdateMsg
 from Message.QuestionMsg import QuestionMsg
 from Message.AttributeUpdateMsg import AttributeUpdateMsg
 
 class Board(GameObjectInterface):
 
-    def __init__(self, num_spaces = 12):
+    max_boardsize = 1000
+    min_boardsize = 1
+    default_boardsize = 12
+
+    def __init__(self, num_spaces = default_boardsize):
         self.players = []
         self.spaces = []
         self.players2spaces = {}
 
-        if (type(num_spaces) is int and num_spaces > 0 and num_spaces < 1000):
-            self.numSpaces = num_spaces
+        if (type(num_spaces) is int and num_spaces > self.min_boardsize and num_spaces < self.max_boardsize):
+            self.num_spaces = num_spaces
+        else: 
+            self.num_spaces = self.default_boardsize
 
-        for i in range(self.numSpaces):
+        for i in range(self.num_spaces):
             self.spaces.append(Space(i, self.getCategory(i)))
 
     def get_spaces(self):
         return self.spaces
     
+    @property
     def num_players(self):
         return len(self.players)
 
@@ -55,9 +61,9 @@ class Board(GameObjectInterface):
             distance = msg.data[1]
             for p in self.players:
                 if p.uuid == player_id:
-                    newSpace = self.players2spaces[player_id] + distance
+                    newSpace = (self.players2spaces[player_id] + distance) % self.num_spaces
                     # Right now the Board is circular, has no end
-                    self.players2spaces[player_id] = newSpace % self.numSpaces
+                    self.players2spaces[player_id] = newSpace 
                     return QuestionMsg(player_id, self.spaces[newSpace].get_question(), newSpace)
 
             if len(self.players) == 0:

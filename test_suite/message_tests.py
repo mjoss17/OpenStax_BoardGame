@@ -3,8 +3,8 @@ sys.path.append("..")
 
 from GameObjects.Player import Player
 from GameObjects.Board import Board
+from GameObjects.TurnDecider import TurnDecider
 from GameObjects.Gamemaster import GameMaster
-from Message.PurseUpdateMsg import PurseUpdateMsg
 from Message.MovementMsg import MovementMsg
 from Message.EmptyMsg import EmptyMsg
 from Message.NextTurnMsg import NextTurnMsg
@@ -15,39 +15,77 @@ from Message.AttributeUpdateMsg import AttributeUpdateMsg
 from Message.ErrorMsg import ErrorMsg
 from Message.RollMsg import RollMsg
 
-def test_MovementMsg():
+
+def test_MovementMsg_ignore():
 
     newPlayer = Player("Tom")
     mvmtMsg = MovementMsg(newPlayer.uuid, 10)
     returnMsg = newPlayer.processMessage(mvmtMsg)
     assert(isinstance(returnMsg, type(EmptyMsg())))
+    newTurnDecider = TurnDecider()
+    returnMsg = newTurnDecider.processMessage(mvmtMsg)
+    assert(isinstance(returnMsg, EmptyMsg))
 
+def test_MovementMsg_accept():
+
+    newPlayer = Player("Phil")
+    mvmtMsg = MovementMsg(newPlayer.uuid, 10)
     newBoard = Board()
     playerMsg = NewPlayerMsg(newPlayer)
+    assert(newBoard.num_players == 0)
     returnMsg = newBoard.processMessage(playerMsg)
+    assert(newBoard.players2spaces[newPlayer.uuid] == 0)
+    
     returnMsg = newBoard.processMessage(mvmtMsg)
     assert(isinstance(returnMsg, QuestionMsg))
+    assert(newBoard.num_players == 1)
+    assert(newBoard.players2spaces[newPlayer.uuid] == 10)
 
-def test_CoinsUpdateMsg():
+def test_AttributeUpdateMsg_accept():
     newPlayer = Player("Greg")
-    PurseMsg = AttributeUpdateMsg(newPlayer.uuid, "coins", 10)
-    returnMsg = newPlayer.processMessage(PurseMsg)
+    assert(newPlayer.attributes["coins"] == 0)
+    AUpdateMsg = AttributeUpdateMsg(newPlayer.uuid, "coins", 10)
+    returnMsg = newPlayer.processMessage(AUpdateMsg)
     assert(isinstance(returnMsg, AttributeUpdateMsg))
     assert(newPlayer.attributes["coins"] == 10)
-    assert(newPlayer.attributes["jail_status"] == False)
 
+def test_AttributeUpdateMsg_ignore():
+    newPlayer = Player("James")
+    newBoard = Board(10)
+    newTurnDecider = TurnDecider()
+    AUpdateMsg = AttributeUpdateMsg(newPlayer.uuid, "coins", 10)
+    returnMsg = newBoard.processMessage(AUpdateMsg)
+    assert(isinstance(returnMsg, EmptyMsg))
+    assert(newBoard.num_players == 0)
+    returnMsg = newTurnDecider.processMessage(AUpdateMsg)
+    assert(isinstance(returnMsg, EmptyMsg))
+
+def test_NewPlayerMsg_accept():
+
+    newPlayer = Player("Lucas")
     newBoard = Board(11)
+    assert(newBoard.num_players == 0)
     playerMsg = NewPlayerMsg(newPlayer)
     returnMsg = newBoard.processMessage(playerMsg)
-    assert(isinstance(returnMsg, type(NextTurnMsg())))
+    assert(isinstance(returnMsg, NextTurnMsg))
+    assert(newBoard.num_players == 1)
 
-def test_AttributeUpdateMsg():
+def test_NewPlayerMsg_ignore():
+    newPlayer = Player("Christian")
+    newTurnDecider = TurnDecider()
+    playerMsg = NewPlayerMsg(newPlayer)
+    returnMsg = newPlayer.processMessage(playerMsg)
+    assert(isinstance(returnMsg, EmptyMsg))
+    returnMsg = newTurnDecider.processMessage(playerMsg)
+    assert(isinstance(returnMsg, EmptyMsg))
+
+def test_faulty_AttributeUpdateMsg():
     newPlayer = Player("Chester")
     newBoard = Board(100)
     playerMsg = NewPlayerMsg(newPlayer)
 
     returnMsg =  newBoard.processMessage(playerMsg)
-    assert(isinstance(returnMsg, type(NextTurnMsg())))
+    assert(isinstance(returnMsg, NextTurnMsg))
 
     AUpdateMsg = AttributeUpdateMsg(newPlayer.uuid, "jail_status", True)
     returnMsg = newPlayer.processMessage(AUpdateMsg)
@@ -67,49 +105,16 @@ def test_AttributeUpdateMsg():
     assert(isinstance(returnMsg, EmptyMsg))
 
 
-def test_QuestionMsg():
-    nextPlayer = Player("Timmy")
-    newBoard = Board(5)
-
-    playerMsg = NewPlayerMsg(nextPlayer)
-    returnMsg = newBoard.processMessage(playerMsg)
-    print(newBoard.num_players())
-    assert(newBoard.num_players() == 1)
-    
-    mvmtMsg = MovementMsg(nextPlayer.uuid, 1)
-    returnMsg = newBoard.processMessage(mvmtMsg)
-    assert(isinstance(returnMsg, QuestionMsg))
-    
-    returnMsg = nextPlayer.processMessage(returnMsg)
-    assert(isinstance(returnMsg, AnswerMsg))
-
-    returnMsg = newBoard.processMessage(returnMsg)
-    assert(isinstance(returnMsg, AttributeUpdateMsg))
-
-    returnMsg = nextPlayer.processMessage(returnMsg)
-    assert(isinstance(returnMsg, AttributeUpdateMsg))
-    assert(nextPlayer.attributes["coins"] == 1)
-    assert(nextPlayer.attributes["jail_status"] == False)
-
-    returnMsg = nextPlayer.processMessage(returnMsg)
-    assert(nextPlayer.attributes["jail_status"] == False)
-
-def test_JailStatus_change():
-    newPlayer = Player("Jose")
-    newBoard = Board(5)
-
-    playerMsg = NewPlayerMsg(newPlayer)
-    returnMsg = newBoard.processMessage(playerMsg)
-
-    rollMsg = RollMsg(newPlayer.uuid)
-
 
     
 
 if __name__ == "__main__":
 
-    test_MovementMsg()
-    test_CoinsUpdateMsg()
-    test_AttributeUpdateMsg()
-    test_QuestionMsg()
+    test_MovementMsg_ignore()
+    test_MovementMsg_accept()
+    test_AttributeUpdateMsg_accept()
+    test_AttributeUpdateMsg_ignore()
+    test_NewPlayerMsg_accept()
+    test_NewPlayerMsg_ignore()
+    test_faulty_AttributeUpdateMsg()
     print("Everything Passed")

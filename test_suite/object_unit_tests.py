@@ -25,13 +25,13 @@ def test_Gamemaster_creation():
 
 def test_Board_creation():
     newBoard = Board(-5)
-    assert (newBoard.numSpaces == 12)
+    assert (newBoard.num_spaces == 12)
     newBoard = Board()
-    assert (newBoard.numSpaces == 12)
+    assert (newBoard.num_spaces == 12)
     newBoard = Board(100000)
-    assert (newBoard.numSpaces == 12)
+    assert (newBoard.num_spaces == 12)
     newBoard = Board(11)
-    assert (newBoard.numSpaces == 11)
+    assert (newBoard.num_spaces == 11)
 
 
 if __name__ == "__main__":
