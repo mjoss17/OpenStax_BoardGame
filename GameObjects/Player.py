@@ -3,18 +3,23 @@ import uuid
 
 from GameObjects.ParticipantInterface import ParticipantInterface
 from GameObjects.Purse import Purse
+from Message.AnswerMsg import AnswerMsg
 from Message.AttributeUpdateMsg import AttributeUpdateMsg
 from Message.ErrorMsg import ErrorMsg
 from Message.PurseUpdateMsg import PurseUpdateMsg
 from Message.NextTurnMsg import NextTurnMsg
 from Message.EmptyMsg import EmptyMsg
+from Message.QuestionMsg import QuestionMsg
+from Message.RollMsg import RollMsg
+from Message.MovementMsg import MovementMsg
 
 
 class Player(ParticipantInterface):
     
     # Players act by rolling
-    rolling_range = 8;
-    in_pentalty_box = False;
+    rolling_range = 8
+    winning_count = 10
+    in_pentalty_box = False
     purse = Purse()
 
     def __init__(self, name):
@@ -22,18 +27,56 @@ class Player(ParticipantInterface):
         self.uuid = uuid.uuid4()
         self.attributes = {"jail_status" : False}
 
+
     def name(self):
         return self.name
 
     def act(self):
         roll = random.randrange(self.rolling_range + 1)
+        self.check_attribute_updates(roll)
         return roll
+
+    def check_attribute_updates(self, new_roll):
+
+        if (new_roll % 2 != 0 and self.attributes["jail_status"]):
+            self.change_attributes("jail_status", False)
+
+    def change_attributes(self, attribute, value):
+        if attribute in self.attributes.keys():
+            self.attributes[attribute] = value
+            return True
+        else:
+            return False
+
+    def get_answer(self, question):
+        # answers generated randomly right now
+        return random.randrange(self.rolling_range)
 
     def processMessage(self, msg):
 
         if isinstance(msg, PurseUpdateMsg):
-            self.purse.add(msg.data)
-            return NextTurnMsg()
+            if self.uuid != msg.data[0]:
+                return EmptyMsg()
+            else:
+                self.purse.add(msg.data[1])
+                return NextTurnMsg()
+
+        elif isinstance(msg, RollMsg):
+            if self.uuid != msg.data:
+                return EmptyMsg()
+            else:
+                # print("%s jail_status: %s" %(self.name, self.attributes["jail_status"]))
+                return MovementMsg(self.uuid, self.act())
+
+        elif isinstance(msg, QuestionMsg):
+            if self.uuid != msg.data[0]:
+                return EmptyMsg()
+            else:
+                answer = self.get_answer(msg.data[1])
+                return AnswerMsg(answer)
+
+            
+
         elif isinstance(msg, AttributeUpdateMsg):
             msg_player_id = msg.data[0]
             msg_attribute = msg.data[1] 
@@ -41,8 +84,7 @@ class Player(ParticipantInterface):
             if self.uuid != msg_player_id:
                 return EmptyMsg()
             else:
-                if msg_attribute in self.attributes.keys():
-                    self.attributes[msg_attribute] = msg_value
+                if self.change_attributes(msg_attribute, msg_value):
                     return NextTurnMsg()
                 else:
                     return ErrorMsg("Attribute Unavailiable")

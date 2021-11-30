@@ -9,6 +9,8 @@ from Message.MovementMsg import MovementMsg
 from Message.EmptyMsg import EmptyMsg
 from Message.NextTurnMsg import NextTurnMsg
 from Message.NewPlayerMsg import NewPlayerMsg
+from Message.AnswerMsg import AnswerMsg
+from Message.QuestionMsg import QuestionMsg
 from Message.AttributeUpdateMsg import AttributeUpdateMsg
 from Message.ErrorMsg import ErrorMsg
 
@@ -24,11 +26,11 @@ def test_MovementMsg():
     playerMsg = NewPlayerMsg(newPlayer)
     returnMsg = newBoard.processMessage(playerMsg)
     returnMsg = newBoard.processMessage(mvmtMsg)
-    assert(isinstance(returnMsg, type(NextTurnMsg())))
+    assert(isinstance(returnMsg, QuestionMsg))
 
 def test_PurseUpdateMsg():
     newPlayer = Player("Greg")
-    PurseMsg = PurseUpdateMsg(10)
+    PurseMsg = PurseUpdateMsg(newPlayer.uuid, 10)
     returnMsg = newPlayer.processMessage(PurseMsg)
     assert(isinstance(returnMsg, type(NextTurnMsg())))
 
@@ -61,6 +63,24 @@ def test_AttributeUpdateMsg():
     AUpdateMsg = AttributeUpdateMsg(otherPlayer.uuid, "jail_status", True)
     returnMsg = newPlayer.processMessage(AUpdateMsg)
     assert(isinstance(returnMsg, EmptyMsg))
+
+
+def test_QuestionMsg():
+    newPlayer = Player("Timmy")
+    newBoard = Board(5)
+
+    playerMsg = NewPlayerMsg(newPlayer)
+    returnMsg = newBoard.processMessage(playerMsg)
+    
+    mvmtMsg = MovementMsg(newPlayer.uuid, 1)
+    returnMsg = newBoard.processMessage(mvmtMsg)
+    assert(isinstance(returnMsg, QuestionMsg))
+    
+    returnMsg = newPlayer.processMessage(returnMsg)
+    assert(isinstance(returnMsg, AnswerMsg))
+
+    returnMsg = newBoard.processMessage(returnMsg)
+    assert(isinstance(returnMsg, PurseUpdateMsg))
 
 if __name__ == "__main__":
 

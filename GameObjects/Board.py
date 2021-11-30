@@ -1,10 +1,13 @@
 from GameObjects.GameObjectInterface import GameObjectInterface
 from GameObjects.Space import Space
+from Message.AnswerMsg import AnswerMsg
 from Message.EmptyMsg import EmptyMsg
 from Message.MovementMsg import MovementMsg
 from Message.NewPlayerMsg import NewPlayerMsg
 from Message.ErrorMsg import ErrorMsg
 from Message.NextTurnMsg import NextTurnMsg
+from Message.QuestionMsg import QuestionMsg
+from Message.AttributeUpdateMsg import AttributeUpdateMsg
 
 class Board(GameObjectInterface):
 
@@ -38,7 +41,6 @@ class Board(GameObjectInterface):
     def processMessage(self, msg):
 
         if isinstance(msg, NewPlayerMsg):
-
             player = msg.data
             self.players.append(player)
             self.players2spaces[player.uuid] = 0
@@ -53,12 +55,20 @@ class Board(GameObjectInterface):
                     newSpace = self.players2spaces[player_id] + distance
                     # Right now the Board is circular, has no end
                     self.players2spaces[player_id] = newSpace % self.numSpaces
-                    return NextTurnMsg()
+                    return QuestionMsg(player_id, self.spaces[newSpace].get_question(), newSpace)
 
             if len(self.players) == 0:
                 return ErrorMsg("MovementMsg was sent to a board with no players")
             else:
                 return ErrorMsg("MovementMsg was sent with invalid player")
+
+        elif isinstance(msg, AnswerMsg):
+            sender = msg.data[0]
+            space = self.spaces[msg.data[1]]
+            answer = msg.data[2]
+            if space.check_answer(answer):
+                return AttributeUpdateMsg(sender, "score", 1)
+
 
         else:
             return EmptyMsg()

@@ -1,4 +1,5 @@
 from GameObjects.GameObjectInterface import GameObjectInterface
+from Message.EmptyMsg import EmptyMsg
 
 class Space(GameObjectInterface):
 
@@ -7,4 +8,7 @@ class Space(GameObjectInterface):
         self.category = category
 
     def processMessage(self, msg):
-        pass
+        return EmptyMsg()
+
+    def get_question(self):
+        return self.category
