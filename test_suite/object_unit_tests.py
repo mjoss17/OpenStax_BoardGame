@@ -4,7 +4,6 @@ sys.path.append("..")
 from GameObjects.Player import Player
 from GameObjects.Gamemaster import GameMaster
 from GameObjects.Board import Board
-from GameObjects.Purse import Purse
 
 def test_Player_creation():
     newPlayer = Player("Greg")
@@ -13,10 +12,6 @@ def test_Player_creation():
 
     newPlayer = Player(32)
     assert(newPlayer.name == "32")
-
-    assert(newPlayer.purse.add(1) == 1)
-    assert(newPlayer.purse.add(-1) == 0)
-    assert(newPlayer.purse.add(2) == 2)
 
 
 def test_Gamemaster_creation():
