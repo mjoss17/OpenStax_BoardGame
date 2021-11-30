@@ -44,7 +44,7 @@ def test_AttributeUpdateMsg():
 
     returnMsg =  newBoard.processMessage(playerMsg)
     assert(isinstance(returnMsg, type(NextTurnMsg())))
-    
+
     AUpdateMsg = AttributeUpdateMsg(newPlayer.uuid, "jail_status", True)
     returnMsg = newPlayer.processMessage(AUpdateMsg)
     assert(isinstance(returnMsg, NextTurnMsg))
@@ -52,6 +52,15 @@ def test_AttributeUpdateMsg():
     AUpdateMsg = AttributeUpdateMsg(newPlayer.uuid, "height", 72)
     returnMsg = newPlayer.processMessage(AUpdateMsg)
     assert(isinstance(returnMsg, ErrorMsg))
+
+    AUpdateMsg = AttributeUpdateMsg(newPlayer.uuid, "jail_status", False)
+    returnMsg = newPlayer.processMessage(AUpdateMsg)
+    assert(isinstance(returnMsg, NextTurnMsg))
+
+    otherPlayer = Player("Lester")
+    AUpdateMsg = AttributeUpdateMsg(otherPlayer.uuid, "jail_status", True)
+    returnMsg = newPlayer.processMessage(AUpdateMsg)
+    assert(isinstance(returnMsg, EmptyMsg))
 
 
 
@@ -61,4 +70,4 @@ if __name__ == "__main__":
     test_MovementMsg()
     test_PurseUpdateMsg()
     test_AttributeUpdateMsg()
-    print("Everything passed")
+    print("Everything Passed")

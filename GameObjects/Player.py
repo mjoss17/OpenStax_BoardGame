@@ -19,7 +19,7 @@ class Player(ParticipantInterface):
 
     def __init__(self, name):
         self.name = str(name)
-        self.uuid = uuid.uuid1()
+        self.uuid = uuid.uuid4()
         self.attributes = {"jail_status" : False}
 
     def name(self):
