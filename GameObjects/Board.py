@@ -6,25 +6,28 @@ from Message.MovementMsg import MovementMsg
 from Message.NewPlayerMsg import NewPlayerMsg
 from Message.ErrorMsg import ErrorMsg
 from Message.NextTurnMsg import NextTurnMsg
+from Message.PurseUpdateMsg import PurseUpdateMsg
 from Message.QuestionMsg import QuestionMsg
 from Message.AttributeUpdateMsg import AttributeUpdateMsg
 
 class Board(GameObjectInterface):
 
-    spaces = []
-    numSpaces = 12
-    players = []
-    players2spaces = {}
-
     def __init__(self, num_spaces = 12):
+        self.players = []
+        self.spaces = []
+        self.players2spaces = {}
+
         if (type(num_spaces) is int and num_spaces > 0 and num_spaces < 1000):
             self.numSpaces = num_spaces
 
         for i in range(self.numSpaces):
             self.spaces.append(Space(i, self.getCategory(i)))
 
-    def getSpaces(self):
+    def get_spaces(self):
         return self.spaces
+    
+    def num_players(self):
+        return len(self.players)
 
     def getCategory(self, i):
         if i%12 == 0: return 'Pop'
@@ -67,7 +70,9 @@ class Board(GameObjectInterface):
             space = self.spaces[msg.data[1]]
             answer = msg.data[2]
             if space.check_answer(answer):
-                return AttributeUpdateMsg(sender, "score", 1)
+                return AttributeUpdateMsg(sender, "coins", 1)
+            else:
+                return EmptyMsg()
 
 
         else:

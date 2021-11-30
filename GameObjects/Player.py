@@ -19,13 +19,12 @@ class Player(ParticipantInterface):
     # Players act by rolling
     rolling_range = 8
     winning_count = 10
-    in_pentalty_box = False
     purse = Purse()
 
     def __init__(self, name):
         self.name = str(name)
         self.uuid = uuid.uuid4()
-        self.attributes = {"jail_status" : False}
+        self.attributes = {"jail_status" : False, "coins" : 0}
 
 
     def name(self):
@@ -59,7 +58,7 @@ class Player(ParticipantInterface):
                 return EmptyMsg()
             else:
                 self.purse.add(msg.data[1])
-                return NextTurnMsg()
+                return AttributeUpdateMsg(self.uuid, "jail_status", False)
 
         elif isinstance(msg, RollMsg):
             if self.uuid != msg.data:
@@ -73,8 +72,8 @@ class Player(ParticipantInterface):
                 return EmptyMsg()
             else:
                 answer = self.get_answer(msg.data[1])
-                return AnswerMsg(answer)
-
+                space_num = msg.data[2]
+                return AnswerMsg(self.uuid, space_num, answer)
             
 
         elif isinstance(msg, AttributeUpdateMsg):
@@ -85,6 +84,8 @@ class Player(ParticipantInterface):
                 return EmptyMsg()
             else:
                 if self.change_attributes(msg_attribute, msg_value):
+                    if msg_attribute == "coins":
+                        return AttributeUpdateMsg(self.uuid, "jail_status", False)
                     return NextTurnMsg()
                 else:
                     return ErrorMsg("Attribute Unavailiable")

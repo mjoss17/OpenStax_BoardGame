@@ -13,7 +13,7 @@ from Message.AnswerMsg import AnswerMsg
 from Message.QuestionMsg import QuestionMsg
 from Message.AttributeUpdateMsg import AttributeUpdateMsg
 from Message.ErrorMsg import ErrorMsg
-
+from Message.RollMsg import RollMsg
 
 def test_MovementMsg():
 
@@ -28,11 +28,13 @@ def test_MovementMsg():
     returnMsg = newBoard.processMessage(mvmtMsg)
     assert(isinstance(returnMsg, QuestionMsg))
 
-def test_PurseUpdateMsg():
+def test_CoinsUpdateMsg():
     newPlayer = Player("Greg")
-    PurseMsg = PurseUpdateMsg(newPlayer.uuid, 10)
+    PurseMsg = AttributeUpdateMsg(newPlayer.uuid, "coins", 10)
     returnMsg = newPlayer.processMessage(PurseMsg)
-    assert(isinstance(returnMsg, type(NextTurnMsg())))
+    assert(isinstance(returnMsg, AttributeUpdateMsg))
+    assert(newPlayer.attributes["coins"] == 10)
+    assert(newPlayer.attributes["jail_status"] == False)
 
     newBoard = Board(11)
     playerMsg = NewPlayerMsg(newPlayer)
@@ -66,25 +68,48 @@ def test_AttributeUpdateMsg():
 
 
 def test_QuestionMsg():
-    newPlayer = Player("Timmy")
+    nextPlayer = Player("Timmy")
+    newBoard = Board(5)
+
+    playerMsg = NewPlayerMsg(nextPlayer)
+    returnMsg = newBoard.processMessage(playerMsg)
+    print(newBoard.num_players())
+    assert(newBoard.num_players() == 1)
+    
+    mvmtMsg = MovementMsg(nextPlayer.uuid, 1)
+    returnMsg = newBoard.processMessage(mvmtMsg)
+    assert(isinstance(returnMsg, QuestionMsg))
+    
+    returnMsg = nextPlayer.processMessage(returnMsg)
+    assert(isinstance(returnMsg, AnswerMsg))
+
+    returnMsg = newBoard.processMessage(returnMsg)
+    assert(isinstance(returnMsg, AttributeUpdateMsg))
+
+    returnMsg = nextPlayer.processMessage(returnMsg)
+    assert(isinstance(returnMsg, AttributeUpdateMsg))
+    assert(nextPlayer.attributes["coins"] == 1)
+    assert(nextPlayer.attributes["jail_status"] == False)
+
+    returnMsg = nextPlayer.processMessage(returnMsg)
+    assert(nextPlayer.attributes["jail_status"] == False)
+
+def test_JailStatus_change():
+    newPlayer = Player("Jose")
     newBoard = Board(5)
 
     playerMsg = NewPlayerMsg(newPlayer)
     returnMsg = newBoard.processMessage(playerMsg)
-    
-    mvmtMsg = MovementMsg(newPlayer.uuid, 1)
-    returnMsg = newBoard.processMessage(mvmtMsg)
-    assert(isinstance(returnMsg, QuestionMsg))
-    
-    returnMsg = newPlayer.processMessage(returnMsg)
-    assert(isinstance(returnMsg, AnswerMsg))
 
-    returnMsg = newBoard.processMessage(returnMsg)
-    assert(isinstance(returnMsg, PurseUpdateMsg))
+    rollMsg = RollMsg(newPlayer.uuid)
+
+
+    
 
 if __name__ == "__main__":
 
     test_MovementMsg()
-    test_PurseUpdateMsg()
+    test_CoinsUpdateMsg()
     test_AttributeUpdateMsg()
+    test_QuestionMsg()
     print("Everything Passed")

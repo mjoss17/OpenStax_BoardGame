@@ -12,3 +12,10 @@ class Space(GameObjectInterface):
 
     def get_question(self):
         return self.category
+
+    def check_answer(self, answer):
+        return True
+        # if answer == 0:
+        #     return True
+        # else:
+        #     return False
