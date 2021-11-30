@@ -1,11 +1,9 @@
 from Message.MessageInterface import MessageInterface
-from GameObjects.Board import Board
 
 class MovementMsg(MessageInterface):
 
-    def __init__(self, data):
-        self.data = data
-        self.checker = lambda x: isinstance(x, Board())
+    def __init__(self, player_num, distance):
+        self.data = [player_num, distance]
 
     def data(self):
         return self.data

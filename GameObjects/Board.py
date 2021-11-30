@@ -1,10 +1,65 @@
 from GameObjects.GameObjectInterface import GameObjectInterface
+from GameObjects.Space import Space
+from Message.EmptyMsg import EmptyMsg
+from Message.MovementMsg import MovementMsg
+from Message.NewPlayerMsg import NewPlayerMsg
+from Message.ErrorMsg import ErrorMsg
+from Message.NextTurnMsg import NextTurnMsg
 
 class Board(GameObjectInterface):
 
+    spaces = []
+    numSpaces = 12
+    players = []
+    players2spaces = {}
+
+    def __init__(self, num_spaces = 12):
+        self.numSpaces = num_spaces
+        for i in range(self.numSpaces):
+            self.spaces.append(Space(i, self.getCategory(i)))
+
+
+    def getCategory(self, i):
+        if i == 0: return 'Pop'
+        if i == 4: return 'Pop'
+        if i == 8: return 'Pop'
+        if i == 1: return 'Science'
+        if i == 5: return 'Science'
+        if i == 9: return 'Science'
+        if i == 2: return 'Sports'
+        if i == 6: return 'Sports'
+        if i == 10: return 'Sports'
+        else: return 'Rock'
+
     def processMessage(self, msg):
-        # get the ok to use this message
-        result = msg.checker(self)
+
+        if isinstance(msg, NewPlayerMsg):
+
+            player = msg.data
+            self.players.append(player)
+            self.players2spaces[player.uuid] = 0
+            print("Board has a New Player - %s" % msg.data.name)
+            
+        elif isinstance(msg, MovementMsg):
+            player_id = msg.data[0]
+            distance = msg.data[1]
+            for p in self.players:
+                if p.uuid == player_id:
+                    newSpace = self.players2spaces[player_id] + distance
+                    # Right now the Board is circular, has no end
+                    self.players2spaces[player_id] = newSpace % self.numSpaces
+                    return NextTurnMsg()
+
+            if len(self.players) == 0:
+                return ErrorMsg("MovementMsg was sent to a board with no players")
+            else:
+                return ErrorMsg("MovementMsg was sent with invalid player")
+
+        else:
+            return EmptyMsg()
+
+
+
         
 
         
