@@ -9,17 +9,28 @@ from Message.NextTurnMsg import NextTurnMsg
 from Message.QuestionMsg import QuestionMsg
 from Message.AttributeUpdateMsg import AttributeUpdateMsg
 
+
+'''
+Board - implements GameObjectInterface
+Contains:
+Players[], Spaces[], players2spaces{}
+
+Handles:
+NewPlayerMsg, MovementMsg, and AnswerMsg
+
+Emits:
+NextTurnMsg, EmptyMsg, QuestionMsg, ErrorMsg and AttributeUpdateMsg
+'''
 class Board(GameObjectInterface):
 
     max_boardsize = 1000
     min_boardsize = 1
     default_boardsize = 12
 
-    def __init__(self, num_spaces = default_boardsize):
+    def __init__(self, num_spaces = default_boardsize, answer = 0):
         self.players = []
         self.spaces = []
         self.players2spaces = {}
-
         if (type(num_spaces) is int and num_spaces > self.min_boardsize and num_spaces < self.max_boardsize):
             self.num_spaces = num_spaces
         else: 
@@ -47,6 +58,12 @@ class Board(GameObjectInterface):
         if i%12 == 10: return 'Sports'
         else: return 'Rock'
 
+    def describe_move(self, position):
+        print("Is now on space %d" %position)
+
+    def describe_category(self, new_space):
+        print("Category is: %s" % self.spaces[new_space].category)
+
     def processMessage(self, msg):
 
         if isinstance(msg, NewPlayerMsg):
@@ -61,10 +78,12 @@ class Board(GameObjectInterface):
             distance = msg.data[1]
             for p in self.players:
                 if p.uuid == player_id:
-                    newSpace = (self.players2spaces[player_id] + distance) % self.num_spaces
-                    # Right now the Board is circular, has no end
-                    self.players2spaces[player_id] = newSpace 
-                    return QuestionMsg(player_id, self.spaces[newSpace].get_question(), newSpace)
+                    new_space = (self.players2spaces[player_id] + distance) % self.num_spaces
+                    self.describe_move(new_space)
+                    self.players2spaces[player_id] = new_space
+                    self.describe_category(new_space)
+                    question = self.spaces[new_space].get_question()
+                    return QuestionMsg(player_id, question, new_space)
 
             if len(self.players) == 0:
                 return ErrorMsg("MovementMsg was sent to a board with no players")
@@ -78,7 +97,7 @@ class Board(GameObjectInterface):
             if space.check_answer(answer):
                 return AttributeUpdateMsg(sender, "coins", 1)
             else:
-                return EmptyMsg()
+                return AttributeUpdateMsg(sender, "jail_status", True)
 
 
         else:

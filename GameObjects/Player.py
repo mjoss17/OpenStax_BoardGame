@@ -12,10 +12,20 @@ from Message.RollMsg import RollMsg
 from Message.MovementMsg import MovementMsg
 from Message.GameOverMsg import GameOverMsg
 
+'''
+Board - implements GameObjectInterface
+Contains:
+Players[], Spaces[], players2spaces{}
 
+Handles:
+QuestionMsg, RollMsg, and AttributeUpdateMsg
+
+Emits:
+NextTurnMsg, EmptyMsg, ErrorMsg, AttributeMsg, MovementMsg, GameoverMsg
+'''
 class Player(ParticipantInterface):
     
-    rolling_range = 8
+    rolling_range = 6
     winning_count = 10
 
     def __init__(self, name):
@@ -28,6 +38,7 @@ class Player(ParticipantInterface):
 
     def act(self):
         roll = random.randrange(self.rolling_range + 1)
+        self.rolled_message(roll)
         self.check_attribute_updates(roll)
         return roll
 
@@ -44,23 +55,41 @@ class Player(ParticipantInterface):
     def get_answer(self, question):
         return random.randrange(self.rolling_range)
 
+    def winning_message(self):
+        print("%s WINS!!! with %d points!" % (self.name, self.attributes["coins"]))
+
+    def scored_message(self):
+        print("%s scored, now has %d coins" % (self.name, self.attributes["coins"]))
+
+    def rolled_message(self, num):
+        print("%s rolled a %d" % (self.name, num))
+
+    def describe_question(self, q):
+        print("Question is: %s" % q)
+    
+    def describe_answer(self, answer):
+        print("Answer: %s" % answer)
 
     def processMessage(self, msg):
+        # Hande RollMsg
         if isinstance(msg, RollMsg):
             if self.uuid != msg.data:
                 return EmptyMsg()
             else:
                 return MovementMsg(self.uuid, self.act())
 
+        # Handle QuestionMsg
         elif isinstance(msg, QuestionMsg):
             if self.uuid != msg.data[0]:
                 return EmptyMsg()
             else:
+                # self.describe_question(msg.data[1])
                 answer = self.get_answer(msg.data[1])
+                self.describe_answer(answer)
                 space_id = msg.data[2]
                 return AnswerMsg(self.uuid, space_id, answer)
             
-
+        # Handle AttributeUpdateMsg
         elif isinstance(msg, AttributeUpdateMsg):
             
             msg_player_id = msg.data[0]
@@ -75,7 +104,9 @@ class Player(ParticipantInterface):
                     return NextTurnMsg()
                 else:
                     self.attributes["coins"] += 1
+                    self.scored_message()
                     if self.attributes["coins"] >= self.winning_count:
+                        self.winning_message()
                         return GameOverMsg() 
                     else:
                         return AttributeUpdateMsg(self.uuid, "jail_status", False)

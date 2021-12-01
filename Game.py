@@ -7,13 +7,20 @@ from Message.GameOverMsg import GameOverMsg
 from Message.NewPlayerMsg import NewPlayerMsg
 from Message.NextTurnMsg import NextTurnMsg
 from Message.RollMsg import RollMsg
+"""
+Game_Updated
 
-class Game_Update:
+Methods:
+add_player() 
+start()
+send_message()
+"""
+class Game_Updated:
 
     game_objects = []
 
-    def __init__(self, num_spaces):
-        board = Board(num_spaces)
+    def __init__(self, num_spaces = 12):
+        board = Board(num_spaces, 3)
         self.game_objects.append(board)
         for s in board.get_spaces():
             self.game_objects.append(s)
@@ -32,7 +39,6 @@ class Game_Update:
             response_queue.append(obj.processMessage(msg))
         return response_queue
 
-
     def start(self):
         while(True):
             player_id = self.turnDecider.get_next_up()
@@ -45,7 +51,6 @@ class Game_Update:
                 if isinstance(resp, NextTurnMsg):
                     nextMove = True
                 elif isinstance(resp, ErrorMsg):
-                    print("Error: Stopping")
                     exit()
                 elif isinstance(resp, GameOverMsg):
                     gameOver = True
@@ -58,12 +63,11 @@ class Game_Update:
 
             if gameOver:
                 break
-            
+
             if not nextMove:
                 print("Error: No next move Confirmation was received")
                 exit()
-            
-        
+          
         print("Game Over")
                     
             

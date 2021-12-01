@@ -4,6 +4,19 @@ from Message.EmptyMsg import EmptyMsg
 from Message.NewPlayerMsg import NewPlayerMsg
 from Message.NextTurnMsg import NextTurnMsg
 
+"""
+TurnDecider - implements GameObject
+Contains:
+player_order
+current_pos 
+num_players
+
+Handles: 
+NewPlayerMsg
+
+Emits
+EmptyMsg
+"""
 class TurnDecider(GameObjectInterface):
 
     def __init__(self):
@@ -24,7 +37,6 @@ class TurnDecider(GameObjectInterface):
             return next_id
 
     def processMessage(self, msg):
-        # print("Turn Decider got %s " % msg.data)
         if isinstance(msg, NewPlayerMsg):
             self.add_player(msg.data)
             return EmptyMsg()
