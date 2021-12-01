@@ -8,14 +8,14 @@ from Message.NewPlayerMsg import NewPlayerMsg
 from Message.NextTurnMsg import NextTurnMsg
 from Message.RollMsg import RollMsg
 """
-Game_Updated
+GameUpdated
 
 Methods:
 add_player() 
 start()
 send_message()
 """
-class Game_Updated:
+class GameUpdated:
 
     game_objects = []
 

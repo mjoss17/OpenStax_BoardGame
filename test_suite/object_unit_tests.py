@@ -7,7 +7,7 @@ from GameObjects.Board import Board
 
 def test_Player_creation():
     newPlayer = Player("Greg")
-    assert (newPlayer.act() > 0)
+    assert (newPlayer.act() >= 0)
     assert (newPlayer.name == "Greg")
 
     newPlayer = Player(32)

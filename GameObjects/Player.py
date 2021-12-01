@@ -39,12 +39,16 @@ class Player(ParticipantInterface):
     def act(self):
         roll = random.randrange(self.rolling_range + 1)
         self.rolled_message(roll)
-        self.check_attribute_updates(roll)
-        return roll
+        return self.check_attribute_updates(roll)
 
     def check_attribute_updates(self, new_roll):
-        if (new_roll % 2 != 0 and self.attributes["jail_status"]):
-            self.change_attributes("jail_status", False)
+        if (self.attributes["jail_status"]):
+            if (new_roll % 2 == 0):
+                self.change_attributes("jail_status", False)
+                return new_roll 
+            else:
+                return None
+        return new_roll
 
     def change_attributes(self, attribute, value):
         if attribute in self.attributes.keys():
@@ -70,13 +74,24 @@ class Player(ParticipantInterface):
     def describe_answer(self, answer):
         print("Answer: %s" % answer)
 
+    def describe_jail(self):
+        print("Jail status %s: %s" % (self.name, self.attributes["jail_status"]))
+
+    def describe_still_jailed(self):
+        print("%s still in Jail" % self.name)
+
     def processMessage(self, msg):
         # Hande RollMsg
         if isinstance(msg, RollMsg):
             if self.uuid != msg.data:
                 return EmptyMsg()
             else:
-                return MovementMsg(self.uuid, self.act())
+                roll = self.act()
+                if roll == None:
+                    self.describe_still_jailed()
+                    return NextTurnMsg()
+                else:
+                    return MovementMsg(self.uuid, roll)
 
         # Handle QuestionMsg
         elif isinstance(msg, QuestionMsg):
@@ -101,9 +116,10 @@ class Player(ParticipantInterface):
             else:
                 if msg_attribute != "coins":
                     self.change_attributes(msg_attribute, msg_value)
+                    self.describe_jail()
                     return NextTurnMsg()
                 else:
-                    self.attributes["coins"] += 1
+                    self.attributes["coins"] += msg_value
                     self.scored_message()
                     if self.attributes["coins"] >= self.winning_count:
                         self.winning_message()

@@ -15,6 +15,13 @@ from Message.AttributeUpdateMsg import AttributeUpdateMsg
 from Message.ErrorMsg import ErrorMsg
 from Message.RollMsg import RollMsg
 
+"""
+message_tests.py
+
+These tests make sure that messages passed between GameObjects
+are being processed by the corect objects and ingored by the others
+"""
+
 
 def test_MovementMsg_ignore():
 
@@ -44,16 +51,16 @@ def test_MovementMsg_accept():
 def test_AttributeUpdateMsg_accept():
     newPlayer = Player("Greg")
     assert(newPlayer.attributes["coins"] == 0)
-    AUpdateMsg = AttributeUpdateMsg(newPlayer.uuid, "coins", 10)
+    AUpdateMsg = AttributeUpdateMsg(newPlayer.uuid, "coins", 2)
     returnMsg = newPlayer.processMessage(AUpdateMsg)
     assert(isinstance(returnMsg, AttributeUpdateMsg))
-    assert(newPlayer.attributes["coins"] == 10)
+    assert(newPlayer.attributes["coins"] == 2)
 
 def test_AttributeUpdateMsg_ignore():
     newPlayer = Player("James")
     newBoard = Board(10)
     newTurnDecider = TurnDecider()
-    AUpdateMsg = AttributeUpdateMsg(newPlayer.uuid, "coins", 10)
+    AUpdateMsg = AttributeUpdateMsg(newPlayer.uuid, "coins", 2)
     returnMsg = newBoard.processMessage(AUpdateMsg)
     assert(isinstance(returnMsg, EmptyMsg))
     assert(newBoard.num_players == 0)
@@ -91,9 +98,6 @@ def test_faulty_AttributeUpdateMsg():
     returnMsg = newPlayer.processMessage(AUpdateMsg)
     assert(isinstance(returnMsg, NextTurnMsg))
 
-    AUpdateMsg = AttributeUpdateMsg(newPlayer.uuid, "height", 72)
-    returnMsg = newPlayer.processMessage(AUpdateMsg)
-    assert(isinstance(returnMsg, ErrorMsg))
 
     AUpdateMsg = AttributeUpdateMsg(newPlayer.uuid, "jail_status", False)
     returnMsg = newPlayer.processMessage(AUpdateMsg)
