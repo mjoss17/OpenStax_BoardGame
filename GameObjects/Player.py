@@ -13,15 +13,15 @@ from Message.MovementMsg import MovementMsg
 from Message.GameOverMsg import GameOverMsg
 
 '''
-Board - implements GameObjectInterface
+Player - implements GameObjectInterface, implements ParticipantInterface
 Contains:
-Players[], Spaces[], players2spaces{}
+name, uuid, attributes{}
 
 Handles:
 QuestionMsg, RollMsg, and AttributeUpdateMsg
 
 Emits:
-NextTurnMsg, EmptyMsg, ErrorMsg, AttributeMsg, MovementMsg, GameoverMsg
+NextTurnMsg, EmptyMsg, ErrorMsg, AttributeMsg, MovementMsg, GameoverMsg, AnswerMsg
 '''
 class Player(ParticipantInterface):
     
@@ -84,7 +84,7 @@ class Player(ParticipantInterface):
                 return EmptyMsg()
             else:
                 # self.describe_question(msg.data[1])
-                answer = self.get_answer(msg.data[1])
+                answer = self.get_answer(msg.data[1]) ### here
                 self.describe_answer(answer)
                 space_id = msg.data[2]
                 return AnswerMsg(self.uuid, space_id, answer)

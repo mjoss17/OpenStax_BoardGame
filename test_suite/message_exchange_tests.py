@@ -35,12 +35,16 @@ def test_QuestionAndAnswerExchange():
 
     assert(nextPlayer.attributes["coins"] == 0)
     returnMsg = nextPlayer.processMessage(returnMsg)
-    assert(isinstance(returnMsg, AttributeUpdateMsg))
-    assert(nextPlayer.attributes["coins"] == 1)
-    assert(nextPlayer.attributes["jail_status"] == False)
 
-    returnMsg = nextPlayer.processMessage(returnMsg)
-    assert(nextPlayer.attributes["jail_status"] == False)
+    if(isinstance(returnMsg, AttributeUpdateMsg)):
+        assert(nextPlayer.attributes["coins"] == 1)
+        assert(nextPlayer.attributes["jail_status"] == False)
+
+        returnMsg = nextPlayer.processMessage(returnMsg)
+        assert(nextPlayer.attributes["jail_status"] == False)
+    else:
+        assert(isinstance(returnMsg, NextTurnMsg))
+
 
 def test_JailStatus_change():
     newPlayer = Player("Jose")
@@ -69,13 +73,15 @@ def test_JailStatus_change():
 
     assert(newPlayer.attributes["coins"] == 0)
     returnMsg = newPlayer.processMessage(returnMsg)
-    assert(isinstance(returnMsg, AttributeUpdateMsg))
-    assert(newPlayer.attributes["coins"] == 1)
-    assert(newPlayer.attributes["jail_status"] == True)
+    
+    if (isinstance(returnMsg, AttributeUpdateMsg)):
+        assert(newPlayer.attributes["coins"] == 1)
+        assert(newPlayer.attributes["jail_status"] == True)
 
-    returnMsg = newPlayer.processMessage(returnMsg)
-    assert(newPlayer.attributes["jail_status"] == False)
-
+        returnMsg = newPlayer.processMessage(returnMsg)
+        assert(newPlayer.attributes["jail_status"] == False)
+    else:
+        assert(isinstance(returnMsg, NextTurnMsg))
 
 if __name__ == "__main__":
 
